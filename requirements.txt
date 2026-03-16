@@ -1,0 +1,6 @@
+openai>=1.0
+requests>=2.28.0
+qianfan>=0.3.0
+dashscope>=1.11.0  # 通义千问SDK，替代openai兼容模式以获得更好支持
+websocket-client>=1.6.0
+colorama>=0.4.6

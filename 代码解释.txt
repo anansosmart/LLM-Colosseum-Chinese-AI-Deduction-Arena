@@ -1,0 +1,74 @@
+1.ai_client.py
+class AIClient:
+属性
+model_type
+config
+
+函数
+send_message()：如果 send_openai_message 执行失败，则打印“调用失败”
+send_openai_message：将信息发送给 AI，返回的 response 会传回 Player 类中的 ask_question 函数
+
+  
+2.player.py
+class Player:
+属性
+player_id
+name
+model_type
+AIClient(model_type, config)：每个 AI 一个接口
+is_alive = True：用于判断玩家是否仍存活
+
+函数
+ask_question：构造系统提示词 + 提问指令，调用 ai_client.send_message 获取 response 并生成问题，返回到 TurtleSoupGame
+generate_system_prompt：构建系统提示语，包含游戏规则，定义 AI 的行为（如何提问和如何回答）
+eliminate：标记该玩家为淘汰状态
+
+  
+3.turtle_soup_game.py
+class TurtleSoupGame
+属性
+players：所有玩家
+state = GameState(players)
+story：故事描述
+
+函数
+run_game：控制完整游戏流程：遍历所有存活玩家，进行每一轮发言，判断是否有人猜中真相；如果无人猜中，则游戏结束
+
+
+4.game_state.py
+class GameState:
+属性
+players
+question_counts：字典结构，用于记录每位玩家已提问的次数
+correct_guessed：若某位玩家猜中真相，则设为 True，用于控制游戏终止条件
+winner：记录获胜的 AI
+history：存储每轮的问题与回答
+
+函数
+increase_question_count()：玩家提问后，调用此函数增加计数；若超过 5 次则调用 eliminate() 淘汰玩家
+get_player_by_id：在 increase_question_count 中使用，用于确认玩家对象
+get_alive_players：返回存活玩家列表，在 run_game 中用于轮流提问
+get_dead_players：返回淘汰玩家列表，当前未使用
+is_game_over：判断游戏是否结束（是否有人猜中或全部淘汰）；在 run_game 的 while 循环中作为条件使用
+set_game_winner：当 correct_guessed = True 时，将当前玩家记录为 winner。若某人猜中（由 is_correct_guess() 判断），则调用此函数。主要用于保存赢家信息
+conversation_history：记录每位玩家的提问与回应；在 run_game 中使用
+print_player_status：输出所有玩家的当前状态（存活/淘汰），但目前未使用
+
+  
+5.main.py
+将所有模型实例化为 Player 对象并赋予相应属性
+启动游戏：game = TurtleSoupGame(players)，执行 game.run_game()
+捕获运行异常并打印错误信息
+
+6.models_config.py
+存放所有 AI 模型的 API key 和 Base URL 配置
+包含一个 MODELS 列表，用于管理多个模型的基本信息
+
+7.judge.py
+函数
+judge_answer()：通过检查问题中是否包含关键词来返回 “是/否” 回答
+
+8.story.py
+函数
+story_description()：海龟汤的故事内容，在 run_game 的开头引用
+is_correct_guess()：判断玩家是否在回答中提到了所有关键词；若是则返回 True，在 AI 提问结束后调用，用于判断是否猜中真相
